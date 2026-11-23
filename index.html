@@ -73,10 +73,11 @@
 
     /* Top subtle floating badge */
     .top-badge {
+      --badge-x: -50%;
       position: absolute;
       top: max(16px, env(safe-area-inset-top, 16px));
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(var(--badge-x));
       z-index: 25;
       display: inline-flex;
       align-items: center;
@@ -93,11 +94,22 @@
       font-size: clamp(0.8rem, 2.5vw, 1.02rem);
       letter-spacing: 0.01em;
       white-space: nowrap;
-      max-width: calc(100vw - 24px);
+      max-width: calc(100vw - 140px);
       overflow: hidden;
       text-overflow: ellipsis;
       animation: badgeFloat 4s ease-in-out infinite;
       pointer-events: none;
+    }
+
+    @media (max-width: 560px) {
+      .top-badge {
+        --badge-x: 0%;
+        left: max(12px, env(safe-area-inset-left, 12px));
+        max-width: calc(100vw - 78px);
+        padding: 7px 12px;
+        gap: 6px;
+        font-size: clamp(0.73rem, 3.1vw, 0.88rem);
+      }
     }
 
     .top-badge svg {
@@ -107,49 +119,163 @@
     }
 
     @keyframes badgeFloat {
-      0%, 100% { transform: translateX(-50%) translateY(0px); }
-      50%      { transform: translateX(-50%) translateY(-4px); }
+      0%, 100% { transform: translateX(var(--badge-x)) translateY(0px); }
+      50%      { transform: translateX(var(--badge-x)) translateY(-4px); }
     }
 
-    /* Audio toggle button (appears gently after music starts) */
+    /* Floating red-and-gold music control button in top-right corner */
     .audio-toggle {
       position: absolute;
+      top: max(14px, env(safe-area-inset-top, 14px));
       right: max(14px, env(safe-area-inset-right, 14px));
-      bottom: max(14px, env(safe-area-inset-bottom, 14px));
-      z-index: 28;
-      width: 44px;
-      height: 44px;
+      z-index: 32;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
-      border: 1px solid rgba(185, 118, 45, 0.42);
-      background: rgba(255, 249, 236, 0.78);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      box-shadow: 0 4px 14px rgba(120, 40, 50, 0.14);
-      color: #9e1b22;
+      border: 1.5px solid rgba(252, 211, 77, 0.85);
+      background: linear-gradient(145deg, rgba(185, 22, 28, 0.82), rgba(118, 8, 14, 0.88));
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow:
+        0 6px 18px rgba(122, 14, 24, 0.25),
+        inset 0 1px 2px rgba(255, 240, 180, 0.35);
+      color: #fde68a;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      opacity: 0;
-      pointer-events: none;
-      transform: scale(0.85);
-      transition: opacity 0.35s ease, transform 0.25s ease, background 0.2s ease;
+      transition: transform 0.25s ease, box-shadow 0.3s ease, background 0.25s ease;
     }
 
-    .audio-toggle.visible {
-      opacity: 1;
-      pointer-events: auto;
-      transform: scale(1);
+    .audio-toggle.playing {
+      background: linear-gradient(145deg, rgba(208, 24, 32, 0.9), rgba(138, 10, 18, 0.94));
+      box-shadow:
+        0 6px 20px rgba(122, 14, 24, 0.32),
+        0 0 18px rgba(251, 191, 36, 0.62),
+        inset 0 1px 3px rgba(255, 245, 190, 0.48);
     }
 
     .audio-toggle:hover {
-      background: rgba(255, 252, 244, 0.96);
-      transform: scale(1.06);
+      transform: scale(1.07);
+      box-shadow:
+        0 8px 22px rgba(122, 14, 24, 0.34),
+        0 0 20px rgba(251, 191, 36, 0.7);
     }
 
     .audio-toggle:focus-visible {
-      outline: 2px solid #b31217;
-      outline-offset: 2px;
+      outline: 2px solid #fbbf24;
+      outline-offset: 3px;
+    }
+
+    /* Spinning vinyl / lacquer disc inside button */
+    .music-disc {
+      width: 30px;
+      height: 30px;
+      animation: discSpin 5.5s linear infinite;
+      animation-play-state: paused;
+      transition: opacity 0.25s ease;
+    }
+
+    .audio-toggle.playing .music-disc {
+      animation-play-state: running;
+    }
+
+    @keyframes discSpin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* Subtle animated sound-wave bars overlay while playing */
+    .sound-waves {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 11px;
+      padding: 2px 3px;
+      border-radius: 6px;
+      background: rgba(118, 8, 14, 0.85);
+      border: 1px solid rgba(252, 211, 77, 0.6);
+      opacity: 0;
+      transform: scale(0.75);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: none;
+    }
+
+    .audio-toggle.playing .sound-waves {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .sound-waves span {
+      width: 2px;
+      height: 4px;
+      border-radius: 2px;
+      background: #fde047;
+      animation: waveBounce 0.9s ease-in-out infinite;
+    }
+
+    .sound-waves span:nth-child(2) { animation-delay: 0.2s; }
+    .sound-waves span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes waveBounce {
+      0%, 100% { height: 3px; }
+      50%      { height: 9px; }
+    }
+
+    /* Paused badge slash/play cue */
+    .music-paused-dot {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff8e7;
+      border: 1px solid #d97706;
+      color: #b31217;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      transform: scale(1);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: none;
+    }
+
+    .audio-toggle.playing .music-paused-dot {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+
+    /* Custom Vietnamese hover/focus tooltip */
+    .audio-toggle::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      padding: 5px 11px;
+      border-radius: 999px;
+      background: rgba(122, 9, 13, 0.92);
+      border: 1px solid rgba(252, 211, 77, 0.65);
+      color: #fef3c7;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 6px 14px rgba(80, 12, 18, 0.22);
+      opacity: 0;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .audio-toggle:hover::after,
+    .audio-toggle:focus-visible::after {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     /* Fireworks & Flower Burst Canvases */
@@ -912,29 +1038,35 @@
     <!-- Blooming Flower Burst Overlay Canvas -->
     <canvas id="flower-burst" aria-hidden="true"></canvas>
 
-    <!-- Audio Control Button -->
+    <!-- Floating Red-and-Gold Music Control Button -->
     <button
       type="button"
       class="audio-toggle"
       id="audioToggle"
-      aria-label="Tắt nhạc nền"
-      title="Tắt hoặc bật nhạc nền"
+      data-tooltip="Bật / Tắt nhạc"
+      aria-label="Bật / Tắt nhạc"
+      aria-pressed="false"
+      title="Bật / Tắt nhạc"
     >
-      <svg id="audioIconOn" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" opacity="0.22"/>
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+      <svg class="music-disc" viewBox="0 0 36 36" aria-hidden="true">
+        <circle cx="18" cy="18" r="15.5" fill="rgba(122, 9, 13, 0.45)" stroke="#fcd34d" stroke-width="1.6" />
+        <circle cx="18" cy="18" r="11.2" fill="none" stroke="#fde68a" stroke-width="0.9" stroke-dasharray="5 3" opacity="0.72" />
+        <circle cx="18" cy="18" r="7.2" fill="#f59e0b" stroke="#fff7cc" stroke-width="1" />
+        <!-- Musical Eighth Note inside Disc -->
+        <path d="M19.2 13.5 L19.2 19.8 A2.1 1.6 0 1 1 17.5 18.3 L17.5 13.5 L21.4 12.6 L21.4 14.5 Z" fill="#7a090d" />
       </svg>
-      <svg id="audioIconOff" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none" aria-hidden="true">
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-        <line x1="23" y1="9" x2="17" y2="15" />
-        <line x1="17" y1="9" x2="23" y2="15" />
-      </svg>
+      <span class="sound-waves" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
+      <span class="music-paused-dot" aria-hidden="true">
+        <svg viewBox="0 0 12 12" width="8" height="8" fill="currentColor">
+          <polygon points="3.5,2.2 10,6 3.5,9.8" />
+        </svg>
+      </span>
     </button>
 
-    <!-- Traditional Vietnamese Instrumental Audio (Dan Tranh + Bamboo Flute synthesized WAV) -->
-    <audio id="bg-music" loop preload="auto"></audio>
+    <!-- Background Music Audio Track -->
+    <audio id="bg-music" src="VNTVSN.mp3" loop preload="auto"></audio>
   </div>
 
   <script>
@@ -1052,197 +1184,107 @@
       buildDongSonWatermark();
 
       /* ============================================================
-         1. TRADITIONAL VIETNAMESE INSTRUMENTAL AUDIO SYNTHESIZER
-            Dan Tranh (Plucked Zither) + Bamboo Flute (Sao Truc)
-            Synthesized directly into a seamless looping WAV Blob
+         1. BACKGROUND MUSIC CONTROLLER (VNTVSN.mp3 + 1.5s Fade-In)
          ============================================================ */
       const bgMusic = document.getElementById("bg-music");
       const audioToggle = document.getElementById("audioToggle");
-      const audioIconOn = document.getElementById("audioIconOn");
-      const audioIconOff = document.getElementById("audioIconOff");
+      const TARGET_VOLUME = 0.8;
+      const FADE_DURATION_MS = 1500;
       let musicStarted = false;
-      let musicMuted = false;
+      let userPausedMusic = false;
+      let fadeRafId = null;
 
-      function generateVietnameseMusicWavUrl() {
-        const sampleRate = 22050;
-        const duration = 16.0; // 16-second seamless loop
-        const totalSamples = Math.floor(sampleRate * duration);
-        const buf = new Float32Array(totalSamples);
-
-        // Vietnamese Pentatonic Frequencies (C D F G A scale - Dieu Nam / Ly)
-        const N = {
-          G2: 98.00,  A2: 110.00, C3: 130.81, D3: 146.83, F3: 174.61, G3: 196.00, A3: 220.00,
-          C4: 261.63, D4: 293.66, F4: 349.23, G4: 392.00, A4: 440.00,
-          C5: 523.25, D5: 587.33, F5: 698.46, G5: 783.99, A5: 880.00
-        };
-
-        // Add Dan Tranh silk-string pluck into circular buffer for seamless wraparound
-        function addDanTranh(startTime, freq, gain, decayRate, vibratoDepth = 0.004) {
-          const startIdx = Math.floor(startTime * sampleRate);
-          const noteLen = Math.floor(2.6 * sampleRate);
-          let phase = 0;
-          for (let i = 0; i < noteLen; i++) {
-            const t = i / sampleRate;
-            const env = Math.min(1, t / 0.005) * Math.exp(-t * decayRate);
-            if (env < 0.0005) break;
-            const vib = t > 0.12 ? Math.sin(2 * Math.PI * 5.2 * (t - 0.12)) * vibratoDepth * Math.min(1, (t - 0.12) / 0.15) : 0;
-            const instFreq = freq * (1 + vib);
-            phase += (2 * Math.PI * instFreq) / sampleRate;
-
-            const s =
-              Math.sin(phase) * 0.62 +
-              Math.sin(phase * 2) * 0.25 * Math.exp(-t * 2.2) +
-              Math.sin(phase * 3) * 0.10 * Math.exp(-t * 4.5) +
-              Math.sin(phase * 4) * 0.04 * Math.exp(-t * 8.0);
-
-            const idx = (startIdx + i) % totalSamples;
-            buf[idx] += s * env * gain;
-          }
+      function cancelVolumeFade() {
+        if (fadeRafId !== null) {
+          cancelAnimationFrame(fadeRafId);
+          fadeRafId = null;
         }
-
-        // Add Sao Truc (bamboo flute) warm breathy note
-        function addBambooFlute(startTime, dur, freq, gain) {
-          const startIdx = Math.floor(startTime * sampleRate);
-          const totalLen = Math.floor((dur + 0.35) * sampleRate);
-          let phase = 0;
-          let noiseSeed = 1337;
-          for (let i = 0; i < totalLen; i++) {
-            const t = i / sampleRate;
-            const attack = Math.min(1, t / 0.16);
-            const release = t > dur ? Math.max(0, 1 - (t - dur) / 0.35) : 1;
-            const env = attack * release;
-            if (env <= 0) break;
-
-            const vib = t > 0.22 ? Math.sin(2 * Math.PI * 4.8 * (t - 0.22)) * 0.0055 * Math.min(1, (t - 0.22) / 0.2) : 0;
-            const bend = t < 0.09 ? -0.025 * (1 - t / 0.09) : 0; // gentle upward breath slide
-            const instFreq = freq * (1 + vib + bend);
-            phase += (2 * Math.PI * instFreq) / sampleRate;
-
-            noiseSeed = (noiseSeed * 16807) % 2147483647;
-            const breath = ((noiseSeed / 2147483647) * 2 - 1) * 0.018 * (t < 0.25 ? 1.4 : 0.7);
-
-            const s = Math.sin(phase) * 0.82 + Math.sin(phase * 2) * 0.14 + Math.sin(phase * 3) * 0.04 + breath;
-            const idx = (startIdx + i) % totalSamples;
-            buf[idx] += s * env * gain;
-          }
-        }
-
-        // Rolling zither arpeggio chord helper
-        function addArpeggio(time, freqs, gain) {
-          freqs.forEach((f, idx) => addDanTranh(time + idx * 0.045, f, gain * (0.88 - idx * 0.08), 1.9, 0.002));
-        }
-
-        // Compose 16s lyrical Vietnamese folk motif
-        // Warm arpeggio foundation (every 2 seconds)
-        addArpeggio(0.0,  [N.C3, N.G3, N.C4, N.G4], 0.20);
-        addArpeggio(2.0,  [N.F3, N.C4, N.F4, N.A4], 0.19);
-        addArpeggio(4.0,  [N.G2, N.D3, N.G3, N.D4], 0.19);
-        addArpeggio(6.0,  [N.C3, N.G3, N.C4, N.F4], 0.18);
-        addArpeggio(8.0,  [N.A2, N.F3, N.C4, N.A4], 0.19);
-        addArpeggio(10.0, [N.D3, N.A3, N.F4, N.A4], 0.18);
-        addArpeggio(12.0, [N.G2, N.D3, N.G3, N.D4], 0.19);
-        addArpeggio(14.0, [N.C3, N.G3, N.C4, N.G4], 0.20);
-
-        // Dan Tranh melody notes (expressive syncopated folk phrasing)
-        const zitherMelody = [
-          [0.00, N.G4, 0.26, 2.0], [0.50, N.A4, 0.24, 2.2], [1.00, N.C5, 0.30, 1.7], [1.65, N.D5, 0.22, 2.4],
-          [2.00, N.C5, 0.28, 1.8], [2.55, N.A4, 0.24, 2.1], [3.00, N.F4, 0.29, 1.7], [3.60, N.G4, 0.22, 2.3],
-          [4.00, N.D4, 0.27, 1.9], [4.50, N.F4, 0.23, 2.2], [5.00, N.G4, 0.29, 1.6], [5.65, N.A4, 0.21, 2.5],
-          [6.00, N.G4, 0.28, 1.8], [6.60, N.F4, 0.24, 2.2], [7.10, N.D4, 0.25, 2.0], [7.60, N.C4, 0.26, 1.9],
-
-          [8.00, N.A4, 0.27, 1.9], [8.50, N.C5, 0.25, 2.1], [9.00, N.F5, 0.29, 1.7], [9.60, N.D5, 0.24, 2.2],
-          [10.00, N.C5, 0.28, 1.8], [10.50, N.A4, 0.23, 2.3], [11.00, N.F4, 0.27, 1.9], [11.60, N.G4, 0.23, 2.2],
-          [12.00, N.A4, 0.26, 1.9], [12.50, N.G4, 0.24, 2.2], [13.00, N.F4, 0.27, 1.8], [13.55, N.D4, 0.24, 2.2],
-          [14.00, N.C4, 0.30, 1.6], [14.65, N.D4, 0.22, 2.4], [15.10, N.G4, 0.26, 1.9], [15.60, N.F4, 0.21, 2.4]
-        ];
-        zitherMelody.forEach(([t, f, g, d]) => addDanTranh(t, f, g, d, 0.0045));
-
-        // Bamboo flute serene lyrical response
-        addBambooFlute(1.0, 2.2, N.C5, 0.16);
-        addBambooFlute(3.5, 1.9, N.G4, 0.14);
-        addBambooFlute(5.8, 2.0, N.A4, 0.15);
-        addBambooFlute(8.8, 2.3, N.F5, 0.15);
-        addBambooFlute(11.6, 2.1, N.C5, 0.15);
-        addBambooFlute(14.0, 1.7, N.G4, 0.14);
-
-        // Soft 3-tap circular reverb for warm acoustic ambience
-        const wet = new Float32Array(totalSamples);
-        const d1 = Math.floor(0.11 * sampleRate);
-        const d2 = Math.floor(0.19 * sampleRate);
-        const d3 = Math.floor(0.31 * sampleRate);
-        for (let i = 0; i < totalSamples; i++) {
-          const p1 = buf[(i - d1 + totalSamples) % totalSamples];
-          const p2 = buf[(i - d2 + totalSamples) % totalSamples];
-          const p3 = buf[(i - d3 + totalSamples) % totalSamples];
-          wet[i] = buf[i] * 0.82 + p1 * 0.22 + p2 * 0.14 + p3 * 0.09;
-        }
-
-        // Normalize safely to 0.78 peak
-        let peak = 0;
-        for (let i = 0; i < totalSamples; i++) {
-          const a = Math.abs(wet[i]);
-          if (a > peak) peak = a;
-        }
-        const norm = peak > 0 ? 0.78 / peak : 1;
-
-        // Encode 16-bit PCM WAV
-        const dataBytes = totalSamples * 2;
-        const wav = new ArrayBuffer(44 + dataBytes);
-        const view = new DataView(wav);
-        const writeStr = (off, str) => {
-          for (let i = 0; i < str.length; i++) view.setUint8(off + i, str.charCodeAt(i));
-        };
-        writeStr(0, "RIFF");
-        view.setUint32(4, 36 + dataBytes, true);
-        writeStr(8, "WAVE");
-        writeStr(12, "fmt ");
-        view.setUint32(16, 16, true);
-        view.setUint16(20, 1, true);
-        view.setUint16(22, 1, true);
-        view.setUint32(24, sampleRate, true);
-        view.setUint32(28, sampleRate * 2, true);
-        view.setUint16(32, 2, true);
-        view.setUint16(34, 16, true);
-        writeStr(36, "data");
-        view.setUint32(40, dataBytes, true);
-
-        let offset = 44;
-        for (let i = 0; i < totalSamples; i++) {
-          const sample = Math.max(-1, Math.min(1, wet[i] * norm));
-          view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
-          offset += 2;
-        }
-
-        const blob = new Blob([wav], { type: "audio/wav" });
-        return URL.createObjectURL(blob);
       }
 
-      bgMusic.src = generateVietnameseMusicWavUrl();
-      bgMusic.volume = 0.55;
+      function fadeInAudio(fromVol, toVol, durationMs) {
+        cancelVolumeFade();
+        const startVol = Math.max(0, Math.min(1, fromVol));
+        const endVol = Math.max(0, Math.min(1, toVol));
+        bgMusic.volume = startVol;
+        const startTime = performance.now();
 
-      function startBgMusicOnce() {
-        if (musicStarted) return;
+        function stepFade(now) {
+          if (bgMusic.paused) {
+            fadeRafId = null;
+            return;
+          }
+          const progress = Math.min(1, (now - startTime) / durationMs);
+          // Smooth ease-out curve from 0.0 to 0.8
+          const eased = 1 - Math.pow(1 - progress, 2);
+          bgMusic.volume = startVol + (endVol - startVol) * eased;
+          if (progress < 1) {
+            fadeRafId = requestAnimationFrame(stepFade);
+          } else {
+            bgMusic.volume = endVol;
+            fadeRafId = null;
+          }
+        }
+        fadeRafId = requestAnimationFrame(stepFade);
+      }
+
+      function syncMusicButtonUI() {
+        const isPlaying = !bgMusic.paused && !bgMusic.ended;
+        audioToggle.classList.toggle("playing", isPlaying);
+        audioToggle.setAttribute("aria-pressed", isPlaying ? "true" : "false");
+      }
+
+      bgMusic.addEventListener("play", syncMusicButtonUI);
+      bgMusic.addEventListener("pause", syncMusicButtonUI);
+      bgMusic.addEventListener("ended", syncMusicButtonUI);
+
+      function startBgMusicOnGiftClick() {
+        if (musicStarted || userPausedMusic) return;
         musicStarted = true;
-        audioToggle.classList.add("visible");
+        bgMusic.volume = 0;
         const playPromise = bgMusic.play();
-        if (playPromise && typeof playPromise.catch === "function") {
-          playPromise.catch(() => {
-            musicStarted = false;
-          });
+        if (playPromise && typeof playPromise.then === "function") {
+          playPromise
+            .then(() => {
+              syncMusicButtonUI();
+              fadeInAudio(0.0, TARGET_VOLUME, FADE_DURATION_MS);
+            })
+            .catch(() => {
+              musicStarted = false;
+              syncMusicButtonUI();
+            });
+        } else {
+          syncMusicButtonUI();
+          fadeInAudio(0.0, TARGET_VOLUME, FADE_DURATION_MS);
         }
       }
 
       audioToggle.addEventListener("click", (e) => {
         e.stopPropagation();
-        if (!musicStarted) {
-          startBgMusicOnce();
-          return;
+        if (bgMusic.paused) {
+          userPausedMusic = false;
+          const isFirstStart = !musicStarted;
+          musicStarted = true;
+          const fromVol = isFirstStart ? 0.0 : Math.min(bgMusic.volume, 0.15);
+          const fadeMs = isFirstStart ? FADE_DURATION_MS : 450;
+          bgMusic.volume = fromVol;
+          const p = bgMusic.play();
+          if (p && typeof p.then === "function") {
+            p.then(() => {
+              syncMusicButtonUI();
+              fadeInAudio(fromVol, TARGET_VOLUME, fadeMs);
+            }).catch(() => {
+              syncMusicButtonUI();
+            });
+          } else {
+            syncMusicButtonUI();
+            fadeInAudio(fromVol, TARGET_VOLUME, fadeMs);
+          }
+        } else {
+          userPausedMusic = true;
+          cancelVolumeFade();
+          bgMusic.pause();
+          syncMusicButtonUI();
         }
-        musicMuted = !musicMuted;
-        bgMusic.muted = musicMuted;
-        audioIconOn.style.display = musicMuted ? "none" : "block";
-        audioIconOff.style.display = musicMuted ? "block" : "none";
-        audioToggle.setAttribute("aria-label", musicMuted ? "Bật nhạc nền" : "Tắt nhạc nền");
       });
 
       /* ============================================================
@@ -2240,16 +2282,14 @@ Ngày 24/11 không chỉ gợi nhắc dấu mốc "Văn hóa soi đường cho q
 
 Chúc bạn có một ngày lễ 24/11 thật trọn vẹn, bình yên và đong đầy cảm hứng. Mong mỗi chúng ta luôn giữ trọn ngọn lửa tự hào, cùng gìn giữ và lan tỏa bản sắc văn hóa Việt vươn xa!
 
-Chúc mừng Ngày Văn hóa Việt Nam 24/11!
-						by: BurgeryPhuckkk🍔🍔🍔
-`;
+Chúc mừng Ngày Văn hóa Việt Nam 24/11!`;
 
       let stage = "closed"; // "closed" | "photos" | "envelope" | "letter" | "bubbles"
       let envelopeTimeoutId = null;
       let typewriterTimerId = null;
 
       function openGiftBox() {
-        startBgMusicOnce();
+        startBgMusicOnGiftClick();
 
         if (stage === "bubbles") {
           // Gentle joyful celebratory bounce if tapped during finale
@@ -2322,7 +2362,7 @@ Chúc mừng Ngày Văn hóa Việt Nam 24/11!
       }
 
       function openEnvelope() {
-        startBgMusicOnce();
+        startBgMusicOnGiftClick();
         if (stage !== "envelope") return;
         stage = "letter";
 
